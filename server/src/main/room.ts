@@ -1,6 +1,8 @@
 import { Server, Socket } from "socket.io";
 import { Game } from "./game";
 import { Player } from "../entities/player";
+import { Signals } from "@shared/signals/signals";
+import { RoomServerWrapper } from "./server-wrapper";
 
 /*
  * Represents a game room where players can join the game.
@@ -8,13 +10,12 @@ import { Player } from "../entities/player";
  */
 export class Room {
   private name: string;
-  private readonly server: Server;
+  private readonly server: RoomServerWrapper;
   private readonly max_players: number;
 
   private game: Game;
-  private players: Map<string, Player> = new Map();
 
-  constructor(name: string, server: Server, max_players: number) {
+  constructor(name: string, server: RoomServerWrapper, max_players: number) {
     this.name = name;
     this.server = server;
     this.max_players = max_players;
@@ -23,19 +24,19 @@ export class Room {
   }
 
   addPlayer(socket: Socket, username: string) {
-    this.players.set(socket.id, new Player(socket, username));
+    this.game.addPlayer(new Player(socket, username));
   }
 
   removePlayer(playerId: string) {
-    this.players.delete(playerId);
+    this.game.removePlayer(playerId);
   }
 
   hasPlayer(playerId: string): boolean {
-    return this.players.has(playerId);
+    return this.game.getPlayers().has(playerId);
   }
 
   getPlayers() {
-    return Array.from(this.players.values());
+    return Array.from(this.game.getPlayers().values());
   }
 
   getMaxPlayers() {

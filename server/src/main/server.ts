@@ -5,6 +5,7 @@ import { Game } from "./game";
 import { Signals } from "@shared/signals/signals";
 import { GameRoomData, GameServerData } from "@shared/server/server-types";
 import { Room } from "./room";
+import { RoomServerWrapper } from "./server-wrapper";
 
 dotenv.config();
 
@@ -62,7 +63,9 @@ export class GameServer {
     // Load the rooms from the server data
     const roomsData: GameRoomData[] = server.rooms;
     roomsData.forEach((room) => {
-      const newRoom = new Room(room.name, this.io, room.maxPlayers);
+      // ServerWrapper is here so that rooms don't have full access to the Socket.IO server.
+      const serverWrapper = new RoomServerWrapper(this.io, room.name);
+      const newRoom = new Room(room.name, serverWrapper, room.maxPlayers);
       this.rooms.set(room.name, newRoom);
     });
   }
@@ -154,13 +157,15 @@ export class GameServer {
     socket.join(roomName);
     socket.emit(Signals.JOIN_ROOM_SUCCESS);
 
+    console.log(`[SERVER] Player ${username} joined room '${roomName}'`);
+
     await this.updateMainServerPlayerCount(roomName);
 
     // Handle player disconnection
     socket.on("disconnect", async () => {
       room.removePlayer(socket.id);
       console.log(
-        `[SERVER] Player ${username} disconnected from room ${roomName}`
+        `[SERVER] Player ${username} disconnected from room '${roomName}'`
       );
 
       await this.updateMainServerPlayerCount(roomName);

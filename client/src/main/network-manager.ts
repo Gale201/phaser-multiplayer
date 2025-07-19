@@ -1,3 +1,4 @@
+import { Signals } from "@shared/signals/signals";
 import { io, Socket } from "socket.io-client";
 
 export class NetworkManager {
@@ -10,18 +11,18 @@ export class NetworkManager {
     this.socket = io(serverUrl);
   }
 
-  on(event: string, callback: (data: any) => void) {
+  on(signal: Signals, callback: (data: any) => void) {
     if (!this.socket) {
       throw new Error("Socket not connected. Call connect() first.");
     }
-    this.socket.on(event, callback);
+    this.socket.on(signal, callback);
   }
 
-  emit(event: string, data?: any) {
+  emit(signal: Signals, data?: any) {
     if (!this.socket) {
       throw new Error("Socket not connected. Call connect() first.");
     }
-    this.socket.emit(event, data);
+    this.socket.emit(signal, data);
   }
 
   public static getInstance() {

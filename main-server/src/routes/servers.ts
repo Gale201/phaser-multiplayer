@@ -14,7 +14,7 @@ router.post("/", (req, res) => {
     return res.status(400).json({ error: "Invalid request body." });
   }
 
-  const server: GameServerData = servers.find((s) => s.id === serverId);
+  const server: GameServerData = servers.find((s) => s.id === serverId)!;
   if (!server) {
     return res.status(404).json({ error: "Server not found." });
   }
@@ -27,7 +27,7 @@ router.post("/", (req, res) => {
   room.players = players;
 
   console.log(
-    `[SERVER] Updated player count for room ${roomName} on server ${serverId}: ${players}`
+    `[SERVER] Updated player count for room '${roomName}' on server ${serverId}: ${players}`
   );
 
   return res

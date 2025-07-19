@@ -1,6 +1,6 @@
-import { GameServer } from "@shared/server/server-types";
+import { GameServerData } from "@shared/server/server-types";
 
-export const servers: GameServer[] = [
+export const servers: GameServerData[] = [
   {
     id: "eu-1",
     region: "eu",
