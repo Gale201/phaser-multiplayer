@@ -11,14 +11,14 @@ export class NetworkManager {
     this.socket = io(serverUrl);
   }
 
-  on(signal: Signals, callback: (data: any) => void) {
+  on(signal: Signals | string, callback: (data: any) => void) {
     if (!this.socket) {
       throw new Error("Socket not connected. Call connect() first.");
     }
     this.socket.on(signal, callback);
   }
 
-  emit(signal: Signals, data?: any) {
+  emit(signal: Signals | string, data?: any) {
     if (!this.socket) {
       throw new Error("Socket not connected. Call connect() first.");
     }

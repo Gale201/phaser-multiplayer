@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-export class Player {
+export class RemotePlayer {
   private id: string;
   private scene: Phaser.Scene;
   private sprite: Phaser.GameObjects.Sprite;
@@ -17,8 +17,6 @@ export class Player {
 
     this.createAnimations();
     this.sprite.play("player-idle-right");
-
-    this.keys = this.scene.input.keyboard!.addKeys("W,A,S,D");
 
     this.sprite.setScale(3);
   }
@@ -64,41 +62,7 @@ export class Player {
     });
   }
 
-  update(delta: number) {
-    let direction = new Phaser.Math.Vector2();
-
-    if (this.keys.D.isDown) {
-      direction.x += 1;
-      this.sprite.play("player-walk-right", true);
-    }
-    if (this.keys.A.isDown) {
-      direction.x -= 1;
-      this.sprite.play("player-walk-left", true);
-    }
-    if (this.keys.W.isDown) {
-      direction.y -= 1;
-    }
-    if (this.keys.S.isDown) {
-      direction.y += 1;
-    }
-
-    if (direction.length() === 0) {
-      this.sprite.play(
-        `player-idle-${this.sprite.anims.currentAnim!.key.split("-")[2]}`,
-        true
-      );
-      return;
-    } else if (direction.length() !== 0) {
-      this.sprite.play(
-        `player-walk-${this.sprite.anims.currentAnim!.key.split("-")[2]}`,
-        true
-      );
-    }
-
-    direction = direction.normalize();
-    this.sprite.x += direction.x * this.playerSpeed * (delta / 1000);
-    this.sprite.y += direction.y * this.playerSpeed * (delta / 1000);
-  }
+  update(delta: number) {}
 
   getSprite() {
     return this.sprite;
@@ -106,13 +70,5 @@ export class Player {
 
   getId() {
     return this.id;
-  }
-
-  getX() {
-    return this.sprite.x;
-  }
-
-  getY() {
-    return this.sprite.y;
   }
 }

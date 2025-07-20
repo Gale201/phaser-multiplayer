@@ -1,12 +1,21 @@
+import fs from "fs";
+
 export class World {
-  mapJSON: any;
+  private readonly mapFilePath: string = "./assets/maps/map.json";
+  private mapJSON: any;
 
   constructor() {
     this.mapJSON = this.loadMap();
   }
 
   private loadMap() {
-    // Load the map JSON from a file or other source
+    try {
+      const data = fs.readFileSync(this.mapFilePath, "utf-8");
+      return JSON.parse(data);
+    } catch (error) {
+      console.error("Error loading map:", error);
+      return null;
+    }
   }
 
   getMapJSON() {

@@ -1,5 +1,5 @@
 import { Signals } from "@shared/signals/signals";
-import { config } from "./game";
+import { config, gameData } from "./game";
 import { NetworkManager } from "./network-manager";
 
 const username = localStorage.getItem("username");
@@ -25,11 +25,15 @@ network.on(Signals.JOIN_ROOM_SUCCESS, () => {
     roomName + ", on server:",
     serverUrl
   );
-  new Phaser.Game(config);
 });
 
 network.on(Signals.JOIN_ROOM_FAILURE, (error: string) => {
   console.error("Failed to join room:", error);
   alert(`Failed to join room: ${error}`);
   window.location.href = "index.html";
+});
+
+network.on(Signals.LOAD_GAME_DATA, (data) => {
+  gameData.map = data.map;
+  new Phaser.Game(config);
 });

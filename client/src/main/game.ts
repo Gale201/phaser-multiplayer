@@ -1,11 +1,13 @@
 import Phaser from "phaser";
-import Player from "../entities/player";
+import { Player } from "../entities/player";
 import { NetworkManager } from "./network-manager";
 import { Signals } from "@shared/signals/signals";
+import { RemotePlayer } from "../entities/remote-player";
 
-export default class GameScene extends Phaser.Scene {
+export class GameScene extends Phaser.Scene {
   private network: NetworkManager;
   private player!: Player;
+  private map!: Phaser.Tilemaps.Tilemap;
 
   constructor() {
     super("GameScene");
@@ -17,13 +19,21 @@ export default class GameScene extends Phaser.Scene {
 
   setupNetworkListeners() {
     this.network.on(Signals.LOAD_GAME_DATA, (data) => {
-      console.log(data);
+      // this.createMap(data.map);
+    });
+
+    this.network.on(Signals.PLAYER_JOINED, (data) => {
+      const player = new RemotePlayer(this, data.x, data.y, data.id);
+      this.add.existing(player.getSprite());
+    });
+
+    this.network.on(Signals.PLAYER_LEFT, (data) => {
+      // Handle player left
     });
   }
 
   preload() {
     this.load.image("tiles", "spritesheets/tiles.png");
-    this.load.tilemapTiledJSON("map", "maps/map.json");
 
     this.load.spritesheet(
       "player-idle-left",
@@ -60,17 +70,25 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    const map = this.make.tilemap({ key: "map" });
-    const tileset = map.addTilesetImage("tiles", "tiles");
+    this.createMap(gameData.map);
 
-    const layer = map.createLayer("Tile Layer 1", tileset!, 0, 0)!;
-
-    this.player = new Player(this, 100, 100);
+    this.player = new Player(this, 100, 100, this.network.getSocket().id!);
     this.cameras.main.startFollow(this.player.getSprite());
   }
 
   update(time: number, delta: number) {
     this.player.update(delta);
+  }
+
+  private createMap(mapData: any) {
+    this.cache.tilemap.add("map", {
+      format: Phaser.Tilemaps.Formats.TILED_JSON,
+      data: mapData,
+    });
+    this.map = this.make.tilemap({ key: "map" });
+    const tileset = this.map.addTilesetImage("tiles", "tiles");
+
+    const layer = this.map.createLayer("Tile Layer 1", tileset!, 0, 0)!;
   }
 }
 
@@ -88,3 +106,5 @@ export const config: Phaser.Types.Core.GameConfig = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
 };
+
+export const gameData = { map: null };
