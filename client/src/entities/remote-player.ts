@@ -3,25 +3,40 @@ import Phaser from "phaser";
 export class RemotePlayer {
   private id: string;
   private scene: Phaser.Scene;
-  private sprite: Phaser.GameObjects.Sprite;
-  private keys: any;
+  private position: Phaser.Math.Vector2;
+  private username: string;
+  private sprite!: Phaser.GameObjects.Sprite;
 
-  private playerSpeed: number = 200;
+  private velocity: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
 
-  constructor(scene: Phaser.Scene, x: number, y: number, id: string) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    id: string,
+    username: string
+  ) {
     this.scene = scene;
     this.id = id;
+    this.username = username;
+    this.position = new Phaser.Math.Vector2(x, y);
+  }
 
-    this.sprite = scene.add.sprite(x, y, "baco-idle");
+  create() {
+    this.sprite = this.scene.add.sprite(
+      this.position.x,
+      this.position.y,
+      "baco-idle"
+    );
     this.sprite.setOrigin(0.5, 0.5);
 
-    this.createAnimations();
+    // this.createAnimations();
     this.sprite.play("player-idle-right");
 
     this.sprite.setScale(3);
   }
 
-  private createAnimations() {
+  /*   private createAnimations() {
     const anims = this.scene.anims;
 
     anims.create({
@@ -60,9 +75,14 @@ export class RemotePlayer {
       frameRate: 10,
       repeat: -1,
     });
-  }
+  } */
 
   update(delta: number) {}
+
+  setPosition(x: number, y: number) {
+    this.position.set(x, y);
+    this.sprite.setPosition(x, y);
+  }
 
   getSprite() {
     return this.sprite;
@@ -70,5 +90,17 @@ export class RemotePlayer {
 
   getId() {
     return this.id;
+  }
+
+  getUsername() {
+    return this.username;
+  }
+
+  setUsername(username: string) {
+    this.username = username;
+  }
+
+  setVelocity(x: number, y: number) {
+    this.velocity = new Phaser.Math.Vector2(x, y);
   }
 }

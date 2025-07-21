@@ -35,5 +35,6 @@ network.on(Signals.JOIN_ROOM_FAILURE, (error: string) => {
 
 network.on(Signals.LOAD_GAME_DATA, (data) => {
   gameData.map = data.map;
+  gameData.playerData = data.playerData;
   new Phaser.Game(config);
 });

@@ -41,13 +41,24 @@ export class Game {
     setTimeout(this.gameLoop.bind(this), 1000 / this.FPS);
   }
 
-  private update(deltaTime: number) {}
+  private update(deltaTime: number) {
+    for (const player of this.players.values()) {
+      player.update(deltaTime);
+    }
+
+    this.server.emit(Signals.UPDATE_GAME, {
+      players: Array.from(this.players.values()).map((player) =>
+        player.serialized()
+      ),
+    });
+  }
 
   addPlayer(player: Player) {
     this.players.set(player.getId(), player);
     this.server.emit(Signals.PLAYER_JOINED, player.serialized());
     player.send(Signals.LOAD_GAME_DATA, {
       map: this.world.getMapJSON(),
+      playerData: player.serialized(),
     });
   }
 

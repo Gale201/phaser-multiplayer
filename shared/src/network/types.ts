@@ -12,3 +12,14 @@ export type GameServerData = {
   url: string;
   rooms: GameRoomData[];
 };
+
+export type PlayerData = {
+  id: string;
+  username: string;
+  hitbox: { x: number; y: number; w: number; h: number };
+  velocity: { x: number; y: number };
+};
+
+export type GameUpdateData = {
+  players: PlayerData[];
+};

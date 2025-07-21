@@ -1,4 +1,4 @@
-import { GameServerData } from "@shared/server/server-types";
+import { GameServerData } from "@shared/network/types";
 
 export const servers: GameServerData[] = [
   {

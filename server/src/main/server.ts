@@ -3,7 +3,7 @@ import { Server, Socket } from "socket.io";
 import http from "http";
 import { Game } from "./game";
 import { Signals } from "@shared/signals/signals";
-import { GameRoomData, GameServerData } from "@shared/server/server-types";
+import { GameRoomData, GameServerData } from "@shared/network/types";
 import { Room } from "./room";
 import { RoomServerWrapper } from "./server-wrapper";
 

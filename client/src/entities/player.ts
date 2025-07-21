@@ -1,18 +1,35 @@
 import Phaser from "phaser";
+import { GameScene } from "../main/game";
+import { Signals } from "@shared/signals/signals";
 
 export class Player {
   private id: string;
-  private scene: Phaser.Scene;
-  private sprite: Phaser.GameObjects.Sprite;
+  private scene: GameScene;
+  private position: Phaser.Math.Vector2;
+  private username: string;
+
+  private sprite!: Phaser.GameObjects.Sprite;
   private keys: any;
 
-  private playerSpeed: number = 200;
-
-  constructor(scene: Phaser.Scene, x: number, y: number, id: string) {
+  constructor(
+    scene: GameScene,
+    x: number,
+    y: number,
+    id: string,
+    username: string
+  ) {
     this.scene = scene;
     this.id = id;
+    this.position = new Phaser.Math.Vector2(x, y);
+    this.username = username;
+  }
 
-    this.sprite = scene.add.sprite(x, y, "baco-idle");
+  create() {
+    this.sprite = this.scene.add.sprite(
+      this.position.x,
+      this.position.y,
+      "baco-idle"
+    );
     this.sprite.setOrigin(0.5, 0.5);
 
     this.createAnimations();
@@ -70,15 +87,13 @@ export class Player {
     if (this.keys.D.isDown) {
       direction.x += 1;
       this.sprite.play("player-walk-right", true);
-    }
-    if (this.keys.A.isDown) {
+    } else if (this.keys.A.isDown) {
       direction.x -= 1;
       this.sprite.play("player-walk-left", true);
     }
     if (this.keys.W.isDown) {
       direction.y -= 1;
-    }
-    if (this.keys.S.isDown) {
+    } else if (this.keys.S.isDown) {
       direction.y += 1;
     }
 
@@ -96,8 +111,17 @@ export class Player {
     }
 
     direction = direction.normalize();
-    this.sprite.x += direction.x * this.playerSpeed * (delta / 1000);
-    this.sprite.y += direction.y * this.playerSpeed * (delta / 1000);
+
+    this.scene
+      .getNetworkManager()
+      .emit(Signals.SET_PLAYER_DIRECTION, direction);
+  }
+
+  setPosition(x: number, y: number) {
+    if (!this.sprite) return;
+
+    this.position.set(x, y);
+    this.sprite.setPosition(Math.round(x), Math.round(y));
   }
 
   getSprite() {
@@ -106,6 +130,10 @@ export class Player {
 
   getId() {
     return this.id;
+  }
+
+  getUsername() {
+    return this.username;
   }
 
   getX() {

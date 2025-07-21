@@ -1,8 +1,6 @@
 import { Vector2 } from "./vectors";
 
 export class Box {
-  static readonly zero: Box = new Box(0, 0, 0, 0);
-
   x: number;
   y: number;
   w: number;
@@ -32,6 +30,10 @@ export class Box {
     return new Box(this.x, this.y, this.w, this.h);
   }
 
+  static zero(): Box {
+    return new Box(0, 0, 0, 0);
+  }
+
   get centerX() {
     return this.x + this.w / 2;
   }
@@ -56,16 +58,8 @@ export class Box {
     return this.y + this.h;
   }
 
-  getCenter() {
-    return new Vector2(this.centerX, this.centerY);
-  }
-
-  getPosition() {
-    return new Vector2(this.x, this.y);
-  }
-
-  setPosition(x: number, y: number) {
-    this.x = x;
-    this.y = y;
+  addPosition(vector: Vector2): void {
+    this.x += vector.x;
+    this.y += vector.y;
   }
 }

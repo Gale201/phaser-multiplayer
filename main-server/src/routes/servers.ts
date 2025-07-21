@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { servers } from "../server-list/server-list";
-import { GameServerData } from "@shared/server/server-types";
+import { GameServerData } from "@shared/network/types";
 
 const router = Router();
 

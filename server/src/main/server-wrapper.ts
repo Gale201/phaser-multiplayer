@@ -16,4 +16,8 @@ export class RoomServerWrapper {
   emit(signal: Signals, data: any) {
     this.server.to(this.roomName).emit(signal, data);
   }
+
+  getRoomName(): string {
+    return this.roomName;
+  }
 }
