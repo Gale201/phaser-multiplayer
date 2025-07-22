@@ -5,11 +5,14 @@ import { Signals } from "@shared/signals/signals";
 export class Player {
   private id: string;
   private scene: GameScene;
-  private position: Phaser.Math.Vector2;
+  private serverPosition: Phaser.Math.Vector2;
+  private renderPosition: Phaser.Math.Vector2;
   private username: string;
 
   private sprite!: Phaser.GameObjects.Sprite;
   private keys: any;
+
+  private usernameText!: Phaser.GameObjects.Text;
 
   constructor(
     scene: GameScene,
@@ -20,65 +23,36 @@ export class Player {
   ) {
     this.scene = scene;
     this.id = id;
-    this.position = new Phaser.Math.Vector2(x, y);
+    this.serverPosition = new Phaser.Math.Vector2(x, y);
+    this.renderPosition = new Phaser.Math.Vector2(x, y);
     this.username = username;
   }
 
   create() {
     this.sprite = this.scene.add.sprite(
-      this.position.x,
-      this.position.y,
+      this.serverPosition.x,
+      this.serverPosition.y,
       "baco-idle"
     );
     this.sprite.setOrigin(0.5, 0.5);
-
-    this.createAnimations();
     this.sprite.play("player-idle-right");
+    this.sprite.setScale(3);
+
+    this.usernameText = this.scene.add.text(
+      this.serverPosition.x,
+      this.serverPosition.y - 60,
+      this.username,
+      {
+        fontFamily: "monospace",
+        fontSize: "24px",
+        color: "#000000",
+        align: "center",
+        resolution: 2,
+      }
+    );
+    this.usernameText.setOrigin(0.5);
 
     this.keys = this.scene.input.keyboard!.addKeys("W,A,S,D");
-
-    this.sprite.setScale(3);
-  }
-
-  private createAnimations() {
-    const anims = this.scene.anims;
-
-    anims.create({
-      key: "player-idle-left",
-      frames: anims.generateFrameNumbers("player-idle-left", {
-        start: 0,
-        end: 3,
-      }),
-      frameRate: 10,
-      repeat: -1,
-    });
-    anims.create({
-      key: "player-idle-right",
-      frames: anims.generateFrameNumbers("player-idle-right", {
-        start: 0,
-        end: 3,
-      }),
-      frameRate: 10,
-      repeat: -1,
-    });
-    anims.create({
-      key: "player-walk-left",
-      frames: anims.generateFrameNumbers("player-walk-left", {
-        start: 0,
-        end: 7,
-      }),
-      frameRate: 10,
-      repeat: -1,
-    });
-    anims.create({
-      key: "player-walk-right",
-      frames: anims.generateFrameNumbers("player-walk-right", {
-        start: 0,
-        end: 7,
-      }),
-      frameRate: 10,
-      repeat: -1,
-    });
   }
 
   update(delta: number) {
@@ -102,7 +76,6 @@ export class Player {
         `player-idle-${this.sprite.anims.currentAnim!.key.split("-")[2]}`,
         true
       );
-      return;
     } else if (direction.length() !== 0) {
       this.sprite.play(
         `player-walk-${this.sprite.anims.currentAnim!.key.split("-")[2]}`,
@@ -115,13 +88,25 @@ export class Player {
     this.scene
       .getNetworkManager()
       .emit(Signals.SET_PLAYER_DIRECTION, direction);
+
+    this.move();
+  }
+
+  move() {
+    this.renderPosition.lerp(this.serverPosition, 0.2);
+
+    this.sprite.setPosition(
+      Math.round(this.renderPosition.x),
+      Math.round(this.renderPosition.y)
+    );
+    this.usernameText.setPosition(
+      Math.round(this.renderPosition.x),
+      Math.round(this.renderPosition.y - 60)
+    );
   }
 
   setPosition(x: number, y: number) {
-    if (!this.sprite) return;
-
-    this.position.set(x, y);
-    this.sprite.setPosition(Math.round(x), Math.round(y));
+    this.serverPosition.set(x, y);
   }
 
   getSprite() {

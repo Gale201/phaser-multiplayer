@@ -25,8 +25,56 @@ export class PlayerManager {
   }
 
   create() {
+    this.createAnimations();
+
     this.player.create();
-    this.scene.cameras.main.startFollow(this.player.getSprite());
+    this.scene.cameras.main.startFollow(
+      this.player.getSprite(),
+      true,
+      0.04,
+      0.04
+    );
+  }
+
+  private createAnimations() {
+    const anims = this.scene.anims;
+
+    anims.create({
+      key: "player-idle-left",
+      frames: anims.generateFrameNumbers("player-idle-left", {
+        start: 0,
+        end: 3,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: "player-idle-right",
+      frames: anims.generateFrameNumbers("player-idle-right", {
+        start: 0,
+        end: 3,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: "player-walk-left",
+      frames: anims.generateFrameNumbers("player-walk-left", {
+        start: 0,
+        end: 7,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: "player-walk-right",
+      frames: anims.generateFrameNumbers("player-walk-right", {
+        start: 0,
+        end: 7,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
   }
 
   update(deltaTime: number) {

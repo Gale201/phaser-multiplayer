@@ -112,7 +112,6 @@ export const config: Phaser.Types.Core.GameConfig = {
   pixelArt: true,
   roundPixels: true,
   autoRound: true,
-  antialias: false,
   backgroundColor: "#1d1d1d",
   scene: [GameScene],
   scale: {

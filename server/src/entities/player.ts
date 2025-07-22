@@ -9,7 +9,7 @@ import { Collidable } from "../physics/collidable";
 import { PlayerData } from "@shared/network/types";
 
 export class Player extends MovingEntity implements Serializable {
-  static readonly speed = 4;
+  static readonly speed = 5;
 
   private readonly socket: Socket;
   private username: string;
@@ -26,8 +26,6 @@ export class Player extends MovingEntity implements Serializable {
 
   update(deltaTime: number): void {
     this.hitbox.addPosition(this.velocity.scale(deltaTime));
-
-    this.velocity = Vector2.zero();
   }
 
   private setupSocketEvents() {
