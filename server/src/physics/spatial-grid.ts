@@ -7,56 +7,54 @@ export class SpatialHashGrid {
 
   constructor(mapWidth: number, mapHeight: number, tileSize: number) {
     this.tileSize = tileSize;
-    const cols = Math.ceil(mapWidth / tileSize);
-    const rows = Math.ceil(mapHeight / tileSize);
 
-    for (let x = 0; x < cols; x++) {
-      for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < mapWidth; x++) {
+      for (let y = 0; y < mapHeight; y++) {
         this.grid.set(`${x},${y}`, []);
       }
     }
   }
 
-  insert(entity: Collidable) {
-    if (!entity.getHitbox()) return;
+  insert(collidable: Collidable) {
+    if (!collidable.getHitbox()) return;
 
-    const keys = this.getKeysForEntity(entity.getHitbox()!);
+    const keys = this.getKeysForCollidable(collidable.getHitbox()!);
     for (const key of keys) {
       if (!this.grid.has(key)) {
         this.grid.set(key, []);
       }
-      this.grid.get(key)?.push(entity);
+      this.grid.get(key)?.push(collidable);
     }
   }
 
-  remove(entity: Collidable) {
-    for (const cellEntities of this.grid.values()) {
-      const index = cellEntities.indexOf(entity);
+  remove(collidable: Collidable) {
+    for (const cellCollidables of this.grid.values()) {
+      const index = cellCollidables.indexOf(collidable);
       if (index !== -1) {
-        cellEntities.splice(index, 1);
+        cellCollidables.splice(index, 1);
       }
     }
   }
 
   query(hitbox: Box): Collidable[] {
-    const keys = this.getKeysForEntity(hitbox);
-    const entities: Collidable[] = [];
+    const keys = this.getKeysForCollidable(hitbox);
+    const collidables: Collidable[] = [];
 
     for (const key of keys) {
-      const cellEntities = this.grid.get(key);
-      if (cellEntities) {
-        for (const entity of cellEntities) {
-          if (!entities.includes(entity)) {
-            entities.push(entity);
+      const cellCollidables = this.grid.get(key);
+      if (cellCollidables) {
+        for (const collidable of cellCollidables) {
+          if (!collidables.includes(collidable)) {
+            collidables.push(collidable);
           }
         }
       }
     }
 
-    return entities;
+    return collidables;
   }
 
-  private getKeysForEntity(hitbox: Box): string[] {
+  private getKeysForCollidable(hitbox: Box): string[] {
     const keys: string[] = [];
 
     const startX = Math.floor(hitbox.x / this.tileSize);

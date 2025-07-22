@@ -3,6 +3,8 @@ import { Player } from "../entities/player";
 import { Signals } from "@shared/signals/signals";
 import { World } from "../world/world";
 import { RoomServerWrapper } from "./server-wrapper";
+import { CollisionHandler } from "../physics/collision-handler";
+import { Box } from "../physics/box";
 
 export class Game {
   private readonly FPS = 60;
@@ -12,12 +14,21 @@ export class Game {
   private lastUpdateTime: number = performance.now();
 
   private world: World;
+  private collisionHandler: CollisionHandler;
   private players: Map<string, Player> = new Map();
 
   constructor(server: RoomServerWrapper) {
     this.server = server;
 
     this.world = new World();
+
+    this.collisionHandler = new CollisionHandler(
+      this.world.getWidth(),
+      this.world.getHeight(),
+      this.world.getTileSize()
+    );
+
+    this.world.generateTileHitboxes(this.collisionHandler);
 
     this.start();
   }
@@ -46,10 +57,13 @@ export class Game {
       player.update(deltaTime);
     }
 
+    this.collisionHandler.update();
+
     this.server.emit(Signals.UPDATE_GAME, {
       players: Array.from(this.players.values()).map((player) =>
         player.serialized()
       ),
+      world: this.world.getTileHitboxes(),
     });
   }
 
@@ -60,6 +74,7 @@ export class Game {
       map: this.world.getMapJSON(),
       playerData: player.serialized(),
     });
+    this.collisionHandler.addMovingEntity(player);
   }
 
   removePlayer(playerId: string) {

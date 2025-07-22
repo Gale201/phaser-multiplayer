@@ -1,15 +1,25 @@
 import fs from "fs";
-import zlib from "zlib";
+import { Box } from "../physics/box";
+import { CollisionHandler } from "../physics/collision-handler";
+import { CollisionLayer } from "../physics/collision-layers";
 
 export class World {
   private readonly mapFilePath: string = "./assets/maps/map.json";
   private mapJSON: any;
   private tileIds: string[] = [];
   private tileMap: string[][] = [];
+  private tileHitboxesMap: Map<string, Box[]> = new Map();
+  private tileHitboxes: Box[] = [];
+  private width: number;
+  private height: number;
 
   constructor() {
     this.loadMap();
+    this.loadTileHitboxesMap();
     this.createTileMap();
+
+    this.width = this.mapJSON.width;
+    this.height = this.mapJSON.height;
   }
 
   private loadMap() {
@@ -30,6 +40,25 @@ export class World {
     }
   }
 
+  private loadTileHitboxesMap() {
+    try {
+      const data = JSON.parse(
+        fs.readFileSync("./assets/tiles/tile-hitboxes.json", "utf-8")
+      );
+      for (const tileId in data.tileHitboxes) {
+        const hitboxes: Box[] = data.tileHitboxes[tileId];
+        this.tileHitboxesMap.set(
+          tileId,
+          hitboxes.map(
+            (hitbox) => new Box(hitbox.x, hitbox.y, hitbox.w, hitbox.h)
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error loading tile hitboxes:", error);
+    }
+  }
+
   private createTileMap() {
     for (let i = 0; i < this.mapJSON.height; i++) {
       const row: string[] = [];
@@ -41,11 +70,54 @@ export class World {
     }
   }
 
+  generateTileHitboxes(collisionHandler: CollisionHandler) {
+    for (let i = 0; i < this.tileMap.length; i++) {
+      for (let j = 0; j < this.tileMap[i].length; j++) {
+        const tileId = this.tileMap[i][j];
+        const hitboxes = this.tileHitboxesMap.get(tileId) || [];
+
+        const newHitboxes = [];
+        for (let hitbox of hitboxes) {
+          hitbox = hitbox.copy();
+          hitbox.x += j * this.mapJSON.tilewidth;
+          hitbox.y += i * this.mapJSON.tileheight;
+          hitbox.setCollisionLayer(CollisionLayer.ENTITY_LAYER);
+          newHitboxes.push(hitbox);
+        }
+        this.tileHitboxes.push(...newHitboxes);
+      }
+    }
+
+    for (const hitbox of this.tileHitboxes) {
+      collisionHandler.addCollider(hitbox);
+    }
+  }
+
   getMapJSON() {
     return this.mapJSON;
   }
 
   getTileMap() {
     return this.tileMap;
+  }
+
+  getTileIds() {
+    return this.tileIds;
+  }
+
+  getTileHitboxes() {
+    return this.tileHitboxes;
+  }
+
+  getWidth() {
+    return this.width;
+  }
+
+  getHeight() {
+    return this.height;
+  }
+
+  getTileSize() {
+    return this.mapJSON.tilewidth;
   }
 }

@@ -76,8 +76,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
-    this.cameras.main.roundPixels = true;
-
     this.createMap(gameData.map);
 
     this.playerManager.create();

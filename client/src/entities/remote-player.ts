@@ -76,12 +76,12 @@ export class RemotePlayer {
     this.renderPosition.lerp(this.serverPosition, 0.2);
 
     this.sprite.setPosition(
-      Math.round(this.renderPosition.x),
-      Math.round(this.renderPosition.y)
+      Math.round(this.renderPosition.x) + 20,
+      Math.round(this.renderPosition.y) - 38
     );
     this.usernameText.setPosition(
       Math.round(this.renderPosition.x),
-      Math.round(this.renderPosition.y - 60)
+      Math.round(this.renderPosition.y - 96)
     );
   }
 

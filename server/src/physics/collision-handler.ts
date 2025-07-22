@@ -10,23 +10,13 @@ export class CollisionHandler {
   private movingEntities: Array<MovingEntity> = [];
   private spatialGrid: SpatialHashGrid;
 
-  private worldBounds: Box;
-
-  constructor(
-    mapWidth: number,
-    mapHeight: number,
-    tileSize: number,
-    worldBounds: Box
-  ) {
+  constructor(mapWidth: number, mapHeight: number, tileSize: number) {
     this.spatialGrid = new SpatialHashGrid(mapWidth, mapHeight, tileSize);
-
-    this.worldBounds = worldBounds;
   }
 
   update() {
     for (const entity of this.movingEntities) {
       this.resolveCollisions(entity);
-      this.applyWorldBounds(entity);
     }
   }
 
@@ -39,11 +29,21 @@ export class CollisionHandler {
     this.movingEntities.push(entity);
   }
 
+  addCollider(collidable: Collidable) {
+    this.spatialGrid.insert(collidable);
+  }
+
   removeStaticEntity(entity: StaticEntity) {
     this.staticEntities = this.staticEntities.filter(
       (e) => e.getId() !== entity.getId()
     );
     this.spatialGrid.remove(entity);
+  }
+
+  removeMovingEntity(entity: MovingEntity) {
+    this.movingEntities = this.movingEntities.filter(
+      (e) => e.getId() !== entity.getId()
+    );
   }
 
   private resolveCollisions(entity: MovingEntity) {
@@ -87,16 +87,5 @@ export class CollisionHandler {
         entity.handleCollisionForYAxis(potentialCollision);
       }
     }
-  }
-
-  private applyWorldBounds(entity: MovingEntity) {
-    entity.getHitbox().x = Math.min(
-      Math.max(entity.getHitbox().x, this.worldBounds.x),
-      this.worldBounds.w - entity.getHitbox().w
-    );
-    entity.getHitbox().y = Math.min(
-      Math.max(entity.getHitbox().y, this.worldBounds.y),
-      this.worldBounds.h - entity.getHitbox().h
-    );
   }
 }

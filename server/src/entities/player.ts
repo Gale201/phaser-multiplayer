@@ -15,7 +15,7 @@ export class Player extends MovingEntity implements Serializable {
   private username: string;
 
   constructor(socket: Socket, username: string, hitbox: Box | null = null) {
-    super(hitbox || Box.zero());
+    super(hitbox || new Box(100, 100, 40, 10));
     this.socket = socket;
     this.username = username;
 
@@ -25,7 +25,9 @@ export class Player extends MovingEntity implements Serializable {
   }
 
   update(deltaTime: number): void {
-    this.hitbox.addPosition(this.velocity.scale(deltaTime));
+    this.intendedPosition = this.hitbox
+      .getPosition()
+      .add(this.velocity.scale(deltaTime));
   }
 
   private setupSocketEvents() {
@@ -39,10 +41,19 @@ export class Player extends MovingEntity implements Serializable {
   }
 
   handleCollisionForXAxis(collidable: Collidable): void {
-    throw new Error("Method not implemented.");
+    if (this.velocity.x > 0) {
+      this.hitbox.x = collidable.getHitbox().x - this.hitbox.w;
+    } else if (this.velocity.x < 0) {
+      this.hitbox.x = collidable.getHitbox().right;
+    }
   }
+
   handleCollisionForYAxis(collidable: Collidable): void {
-    throw new Error("Method not implemented.");
+    if (this.velocity.y > 0) {
+      this.hitbox.y = collidable.getHitbox().y - this.hitbox.h;
+    } else if (this.velocity.y < 0) {
+      this.hitbox.y = collidable.getHitbox().bottom;
+    }
   }
 
   serialized(): PlayerData {

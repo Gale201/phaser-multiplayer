@@ -1,10 +1,14 @@
+import { Collidable } from "./collidable";
+import { CollisionLayer } from "./collision-layers";
 import { Vector2 } from "./vectors";
 
-export class Box {
+export class Box implements Collidable {
   x: number;
   y: number;
   w: number;
   h: number;
+
+  private collisionLayer: CollisionLayer = CollisionLayer.DEFAULT;
 
   constructor(x: number, y: number, w: number, h: number) {
     this.x = x;
@@ -58,8 +62,23 @@ export class Box {
     return this.y + this.h;
   }
 
-  addPosition(vector: Vector2): void {
-    this.x += vector.x;
-    this.y += vector.y;
+  getPosition(): Vector2 {
+    return new Vector2(this.x, this.y);
+  }
+
+  getHitbox(): Box {
+    return this.copy();
+  }
+
+  getCollisionLayer(): number {
+    return this.collisionLayer;
+  }
+
+  isStatic(): boolean {
+    return true;
+  }
+
+  setCollisionLayer(layer: CollisionLayer): void {
+    this.collisionLayer = layer;
   }
 }
