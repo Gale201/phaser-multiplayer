@@ -1,12 +1,14 @@
 import Phaser from "phaser";
 import { GameScene } from "../main/game";
 import { Signals } from "@shared/signals/signals";
+import { Box } from "../utils/box";
 
 export class Player {
   private id: string;
   private scene: GameScene;
   private serverPosition: Phaser.Math.Vector2;
   private renderPosition: Phaser.Math.Vector2;
+  private hitbox: Box;
   private username: string;
 
   private sprite!: Phaser.GameObjects.Sprite;
@@ -14,17 +16,12 @@ export class Player {
 
   private usernameText!: Phaser.GameObjects.Text;
 
-  constructor(
-    scene: GameScene,
-    x: number,
-    y: number,
-    id: string,
-    username: string
-  ) {
+  constructor(scene: GameScene, hitbox: Box, id: string, username: string) {
     this.scene = scene;
     this.id = id;
-    this.serverPosition = new Phaser.Math.Vector2(x, y);
-    this.renderPosition = new Phaser.Math.Vector2(x, y);
+    this.serverPosition = new Phaser.Math.Vector2(hitbox.x, hitbox.y);
+    this.renderPosition = new Phaser.Math.Vector2(hitbox.x, hitbox.y);
+    this.hitbox = hitbox;
     this.username = username;
   }
 
@@ -34,8 +31,7 @@ export class Player {
       this.serverPosition.y,
       "baco-idle"
     );
-    this.sprite.setOrigin(0.5, 0.5);
-    this.sprite.play("player-idle-right");
+    // this.sprite.setOrigin(0.5, 0.5);
     this.sprite.setScale(3);
 
     this.usernameText = this.scene.add.text(
@@ -50,7 +46,7 @@ export class Player {
         resolution: 2,
       }
     );
-    this.usernameText.setOrigin(0.5);
+    // this.usernameText.setOrigin(0.5);
 
     this.keys = this.scene.input.keyboard!.addKeys("W,A,S,D");
   }
@@ -69,6 +65,10 @@ export class Player {
       direction.y -= 1;
     } else if (this.keys.S.isDown) {
       direction.y += 1;
+    }
+
+    if (!this.sprite.anims.currentAnim) {
+      this.sprite.play("player-idle-right", true);
     }
 
     if (direction.length() === 0) {
@@ -90,23 +90,22 @@ export class Player {
       .emit(Signals.SET_PLAYER_DIRECTION, direction);
 
     this.move();
+
+    this.sprite.setDepth(this.renderPosition.y);
+    this.usernameText.setDepth(this.renderPosition.y);
   }
 
   move() {
     this.renderPosition.lerp(this.serverPosition, 0.2);
 
     this.sprite.setPosition(
-      Math.round(this.renderPosition.x) + 20,
-      Math.round(this.renderPosition.y) - 38
+      Math.round(this.renderPosition.x + this.hitbox.w / 2),
+      Math.round(this.renderPosition.y - this.sprite.height - this.hitbox.h / 2)
     );
     this.usernameText.setPosition(
-      this.renderPosition.x,
-      this.renderPosition.y - 96
+      this.renderPosition.x + this.hitbox.w / 2 - this.usernameText.width / 2,
+      this.renderPosition.y - 110
     );
-  }
-
-  setPosition(x: number, y: number) {
-    this.serverPosition.set(x, y);
   }
 
   getSprite() {
@@ -127,5 +126,17 @@ export class Player {
 
   getY() {
     return this.sprite.y;
+  }
+
+  getHitbox() {
+    return this.hitbox;
+  }
+
+  setPosition(x: number, y: number) {
+    this.serverPosition.set(x, y);
+  }
+
+  setHitbox(hitbox: Box) {
+    this.hitbox = hitbox;
   }
 }

@@ -5,6 +5,7 @@ import { Signals } from "@shared/signals/signals";
 import { RemotePlayer } from "../entities/remote-player";
 import { PlayerManager } from "../entities/player-manager";
 import { GameUpdateData, PlayerData } from "@shared/network/types";
+import { HitboxDebugger } from "../utils/hitbox-debugger";
 
 export class GameScene extends Phaser.Scene {
   private network: NetworkManager;
@@ -12,12 +13,16 @@ export class GameScene extends Phaser.Scene {
 
   private playerManager: PlayerManager;
 
+  private hitboxDebugger: HitboxDebugger;
+
   constructor() {
     super("GameScene");
 
     if (gameData.map === null || gameData.playerData === null) {
       throw new Error("Game data is not loaded.");
     }
+
+    this.hitboxDebugger = new HitboxDebugger(this);
 
     this.network = NetworkManager.getInstance();
 
@@ -27,10 +32,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   setupNetworkListeners() {
-    this.network.on(Signals.PLAYER_JOINED, (data: PlayerData) => {});
+    this.network.on(Signals.PLAYER_JOINED, (data: PlayerData) => {
+      this.playerManager.addRemotePlayer(data);
+    });
 
-    this.network.on(Signals.PLAYER_LEFT, (data) => {
-      // Handle player left
+    this.network.on(Signals.PLAYER_LEFT, (data: string) => {
+      this.playerManager.removePlayer(data);
     });
 
     this.network.on(Signals.UPDATE_GAME, (data: GameUpdateData) => {
@@ -40,6 +47,10 @@ export class GameScene extends Phaser.Scene {
 
   preload() {
     this.load.image("tiles", "spritesheets/padded-tiles.png");
+    this.load.image(
+      "small-bridge-tiles",
+      "spritesheets/small-bridge-tiles.png"
+    );
 
     this.load.spritesheet(
       "player-idle-left",
@@ -79,10 +90,14 @@ export class GameScene extends Phaser.Scene {
     this.createMap(gameData.map);
 
     this.playerManager.create();
+
+    this.hitboxDebugger.create();
   }
 
   update(time: number, delta: number) {
     this.playerManager.update(delta);
+
+    // this.hitboxDebugger.update();
   }
 
   private createMap(mapData: any) {
@@ -93,12 +108,25 @@ export class GameScene extends Phaser.Scene {
 
     this.map = this.make.tilemap({ key: "map" });
     const tileset = this.map.addTilesetImage("tiles", "tiles");
+    const smallBridgeTileset = this.map.addTilesetImage(
+      "small-bridge-tiles",
+      "small-bridge-tiles"
+    );
 
-    const layer = this.map.createLayer("Tile Layer 1", tileset!, 0, 0)!;
+    const layer = this.map.createLayer(
+      "Tile Layer 1",
+      [tileset!, smallBridgeTileset!],
+      0,
+      0
+    )!;
   }
 
   getNetworkManager() {
     return this.network;
+  }
+
+  getHitboxDebugger() {
+    return this.hitboxDebugger;
   }
 }
 
@@ -118,4 +146,8 @@ export const config: Phaser.Types.Core.GameConfig = {
   },
 };
 
-export const gameData = { map: null, playerData: null };
+type GameData = {
+  map: any;
+  playerData: PlayerData | null;
+};
+export const gameData: GameData = { map: null, playerData: null };

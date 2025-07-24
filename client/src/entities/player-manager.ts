@@ -1,4 +1,5 @@
 import { GameScene } from "../main/game";
+import { Box } from "../utils/box";
 import { Player } from "./player";
 import { RemotePlayer } from "./remote-player";
 import { PlayerData } from "@shared/network/types";
@@ -9,16 +10,14 @@ export class PlayerManager {
   private player: Player;
   private remotePlayers: Map<string, RemotePlayer> = new Map();
 
-  constructor(
-    scene: GameScene,
-    playerData: { x: number; y: number; id: string; username: string }
-  ) {
+  private created: boolean = false;
+
+  constructor(scene: GameScene, playerData: PlayerData) {
     this.scene = scene;
 
     this.player = new Player(
       this.scene,
-      playerData.x,
-      playerData.y,
+      Box.from(playerData.hitbox),
       playerData.id,
       playerData.username
     );
@@ -34,6 +33,8 @@ export class PlayerManager {
       0.04,
       0.04
     );
+
+    this.created = true;
   }
 
   private createAnimations() {
@@ -83,11 +84,10 @@ export class PlayerManager {
   }
 
   updatePlayers(players: Array<PlayerData>) {
-    if (!this.player.getSprite()) return;
-
     for (const player of players) {
       if (player.id === this.player.getId()) {
         this.player.setPosition(player.hitbox.x, player.hitbox.y);
+        this.player.setHitbox(Box.from(player.hitbox));
       } else if (this.remotePlayers.has(player.id)) {
         this.remotePlayers
           .get(player.id)!
@@ -95,6 +95,7 @@ export class PlayerManager {
         this.remotePlayers
           .get(player.id)!
           .setVelocity(player.velocity.x, player.velocity.y);
+        this.remotePlayers.get(player.id)!.setHitbox(Box.from(player.hitbox));
       } else {
         this.addRemotePlayer(player);
         console.log("Added remote player:", player.id);
@@ -105,8 +106,7 @@ export class PlayerManager {
   addRemotePlayer(player: PlayerData) {
     const remotePlayer = new RemotePlayer(
       this.scene,
-      player.hitbox.x,
-      player.hitbox.y,
+      Box.from(player.hitbox),
       player.id,
       player.username
     );
@@ -114,7 +114,14 @@ export class PlayerManager {
     this.remotePlayers.set(player.id, remotePlayer);
   }
 
-  removePlayer(id: string) {}
+  removePlayer(id: string) {
+    if (this.remotePlayers.has(id)) {
+      const remotePlayer = this.remotePlayers.get(id)!;
+      remotePlayer.destroy();
+      this.remotePlayers.delete(id);
+      console.log("Removed remote player:", id);
+    }
+  }
 
   hasPlayer(id: string): boolean {
     if (this.player && id === this.player.getId()) return true;
