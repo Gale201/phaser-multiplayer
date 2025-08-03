@@ -93,6 +93,8 @@ export class Player {
 
     this.sprite.setDepth(this.renderPosition.y);
     this.usernameText.setDepth(this.renderPosition.y);
+
+    this.scene.getHitboxDebugger().addHitbox(this.getHitbox());
   }
 
   move() {

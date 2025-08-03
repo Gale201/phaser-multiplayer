@@ -2,11 +2,13 @@ import { CollisionLayer } from "../physics/collision-layers";
 import { Box } from "../physics/box";
 import { v4 as uuidv4 } from "uuid";
 import { Serializable } from "../utils/serializable";
+import { Effect } from "../effects/effect";
 
 export abstract class Entity implements Serializable {
   protected id: string;
   protected hitbox: Box;
-  protected collisionLayer: number = CollisionLayer.ENTITY_LAYER;
+  protected collisionLayer: CollisionLayer = CollisionLayer.NONE;
+  protected collisionMask: number = 0;
 
   constructor(hitbox: Box) {
     this.hitbox = hitbox;
@@ -23,12 +25,16 @@ export abstract class Entity implements Serializable {
     return this.collisionLayer;
   }
 
-  setCollisionLayer(layer: number) {
-    this.collisionLayer = layer;
+  getCollisionMask() {
+    return this.collisionMask;
   }
 
   getId(): string {
     return this.id;
+  }
+
+  setCollisionLayer(layer: CollisionLayer) {
+    this.collisionLayer = layer;
   }
 
   abstract serialized(): any;

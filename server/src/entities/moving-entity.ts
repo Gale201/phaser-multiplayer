@@ -2,10 +2,15 @@ import { Collidable } from "../physics/collidable";
 import { Box } from "../physics/box";
 import { Vector2 } from "../physics/vectors";
 import { Entity } from "./entity";
+import { Effect } from "../effects/effect";
 
 export abstract class MovingEntity extends Entity implements Collidable {
   protected velocity: Vector2;
   protected intendedPosition: Vector2 | null = null;
+
+  isStatic: boolean = false;
+  isTrigger: boolean = false;
+  effects: Effect[] = [];
 
   constructor(hitbox: Box) {
     super(hitbox);
@@ -37,9 +42,5 @@ export abstract class MovingEntity extends Entity implements Collidable {
 
   setVelocity(velocity: Vector2) {
     this.velocity = velocity;
-  }
-
-  isStatic(): boolean {
-    return false;
   }
 }

@@ -6,6 +6,7 @@ import { RemotePlayer } from "../entities/remote-player";
 import { PlayerManager } from "../entities/player-manager";
 import { GameUpdateData, PlayerData } from "@shared/network/types";
 import { HitboxDebugger } from "../utils/hitbox-debugger";
+import { Box } from "../utils/box";
 
 export class GameScene extends Phaser.Scene {
   private network: NetworkManager;
@@ -14,6 +15,8 @@ export class GameScene extends Phaser.Scene {
   private playerManager: PlayerManager;
 
   private hitboxDebugger: HitboxDebugger;
+
+  private worldTiles: Box[] = [];
 
   constructor() {
     super("GameScene");
@@ -42,6 +45,8 @@ export class GameScene extends Phaser.Scene {
 
     this.network.on(Signals.UPDATE_GAME, (data: GameUpdateData) => {
       this.playerManager.updatePlayers(data.players);
+
+      this.worldTiles = data.tiles.map((tile) => Box.from(tile));
     });
   }
 
@@ -49,7 +54,15 @@ export class GameScene extends Phaser.Scene {
     this.load.image("tiles", "spritesheets/padded-tiles.png");
     this.load.image(
       "small-bridge-tiles",
-      "spritesheets/small-bridge-tiles.png"
+      "spritesheets/small-bridge-tiles-padded.png"
+    );
+    this.load.image(
+      "big-bridge-tiles",
+      "spritesheets/big-bridge-tiles-padded.png"
+    );
+    this.load.image(
+      "big-bridge-tiles-h",
+      "spritesheets/big-bridge-tiles-h-padded.png"
     );
 
     this.load.spritesheet(
@@ -97,6 +110,12 @@ export class GameScene extends Phaser.Scene {
   update(time: number, delta: number) {
     this.playerManager.update(delta);
 
+    this.worldTiles.forEach((tile) => {
+      this.hitboxDebugger.addHitbox(tile);
+    });
+
+    this.hitboxDebugger.addHitbox(new Box(620, 460, 10, 80));
+
     // this.hitboxDebugger.update();
   }
 
@@ -112,10 +131,18 @@ export class GameScene extends Phaser.Scene {
       "small-bridge-tiles",
       "small-bridge-tiles"
     );
+    const bigBridgeTileset = this.map.addTilesetImage(
+      "big-bridge-tiles",
+      "big-bridge-tiles"
+    );
+    const bigBridgeTilesetH = this.map.addTilesetImage(
+      "big-bridge-tiles-h",
+      "big-bridge-tiles-h"
+    );
 
     const layer = this.map.createLayer(
       "Tile Layer 1",
-      [tileset!, smallBridgeTileset!],
+      [tileset!, smallBridgeTileset!, bigBridgeTileset!, bigBridgeTilesetH!],
       0,
       0
     )!;

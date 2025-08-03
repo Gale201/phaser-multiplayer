@@ -81,7 +81,8 @@ export class World {
           hitbox = hitbox.copy();
           hitbox.x += j * this.mapJSON.tilewidth;
           hitbox.y += i * this.mapJSON.tileheight;
-          hitbox.setCollisionLayer(CollisionLayer.ENTITY_LAYER);
+          hitbox.setCollisionLayer(CollisionLayer.WORLD);
+          hitbox.setCollisionMask(CollisionLayer.PLAYER);
           newHitboxes.push(hitbox);
         }
         this.tileHitboxes.push(...newHitboxes);

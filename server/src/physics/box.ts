@@ -1,3 +1,4 @@
+import { Effect } from "../effects/effect";
 import { Collidable } from "./collidable";
 import { CollisionLayer } from "./collision-layers";
 import { Vector2 } from "./vectors";
@@ -8,7 +9,12 @@ export class Box implements Collidable {
   w: number;
   h: number;
 
-  private collisionLayer: CollisionLayer = CollisionLayer.DEFAULT;
+  isStatic: boolean = false;
+  isTrigger: boolean = false;
+  effects: Effect[] = [];
+
+  private collisionLayer: CollisionLayer = CollisionLayer.NONE;
+  private collisionMask: number = 0;
 
   constructor(x: number, y: number, w: number, h: number) {
     this.x = x;
@@ -74,11 +80,15 @@ export class Box implements Collidable {
     return this.collisionLayer;
   }
 
-  isStatic(): boolean {
-    return true;
+  getCollisionMask(): number {
+    return this.collisionMask;
   }
 
   setCollisionLayer(layer: CollisionLayer): void {
     this.collisionLayer = layer;
+  }
+
+  setCollisionMask(mask: number): void {
+    this.collisionMask = mask;
   }
 }

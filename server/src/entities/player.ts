@@ -7,6 +7,7 @@ import { Box } from "../physics/box";
 import { MovingEntity } from "./moving-entity";
 import { Collidable } from "../physics/collidable";
 import { PlayerData } from "@shared/network/types";
+import { CollisionLayer } from "../physics/collision-layers";
 
 export class Player extends MovingEntity implements Serializable {
   static readonly speed = 5;
@@ -15,11 +16,14 @@ export class Player extends MovingEntity implements Serializable {
   private username: string;
 
   constructor(socket: Socket, username: string, hitbox: Box | null = null) {
-    super(hitbox || new Box(100, 100, 40, 10));
+    super(hitbox || new Box(400, 500, 40, 10));
     this.socket = socket;
     this.username = username;
 
     this.id = socket.id;
+
+    this.collisionLayer = CollisionLayer.PLAYER;
+    this.collisionMask = CollisionLayer.WORLD | CollisionLayer.EFFECTS;
 
     this.setupSocketEvents();
   }

@@ -5,6 +5,8 @@ import { World } from "../world/world";
 import { RoomServerWrapper } from "./server-wrapper";
 import { CollisionHandler } from "../physics/collision-handler";
 import { Box } from "../physics/box";
+import { CollisionLayer } from "../physics/collision-layers";
+import { BridgeEffect } from "../effects/bridge-effect";
 
 export class Game {
   private readonly FPS = 60;
@@ -30,6 +32,14 @@ export class Game {
 
     this.world.generateTileHitboxes(this.collisionHandler);
 
+    const collider = new Box(620, 460, 10, 80);
+    collider.setCollisionLayer(CollisionLayer.EFFECTS);
+    collider.setCollisionMask(CollisionLayer.PLAYER);
+    collider.isTrigger = true;
+    collider.isStatic = true;
+    collider.effects = [new BridgeEffect()];
+    this.collisionHandler.addCollider(collider);
+
     this.start();
   }
 
@@ -53,6 +63,8 @@ export class Game {
   }
 
   private update(deltaTime: number) {
+    this.collisionHandler.resolveEffects();
+
     for (const player of this.players.values()) {
       player.update(deltaTime);
     }
@@ -63,7 +75,7 @@ export class Game {
       players: Array.from(this.players.values()).map((player) =>
         player.serialized()
       ),
-      world: this.world.getTileHitboxes(),
+      tiles: this.world.getTileHitboxes(),
     });
   }
 
