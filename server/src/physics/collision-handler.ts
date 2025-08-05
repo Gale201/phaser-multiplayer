@@ -10,7 +10,6 @@ export class CollisionHandler {
   private staticEntities: Array<StaticEntity> = [];
   private movingEntities: Array<MovingEntity> = [];
   private spatialGrid: SpatialHashGrid;
-  private effectsApplied: Effect[] = [];
 
   constructor(mapWidth: number, mapHeight: number, tileSize: number) {
     this.spatialGrid = new SpatialHashGrid(mapWidth, mapHeight, tileSize);
@@ -20,8 +19,6 @@ export class CollisionHandler {
     for (const entity of this.movingEntities) {
       this.resolveCollisions(entity);
     }
-
-    this.effectsApplied = [];
   }
 
   resolveEffects() {
@@ -116,5 +113,9 @@ export class CollisionHandler {
       (entity.getCollisionMask() & other.getCollisionLayer()) !== 0 &&
       (other.getCollisionMask() & entity.getCollisionLayer()) !== 0
     );
+  }
+
+  getColliders(): Collidable[] {
+    return this.spatialGrid.getColliders();
   }
 }

@@ -2,6 +2,7 @@ import fs from "fs";
 import { Box } from "../physics/box";
 import { CollisionHandler } from "../physics/collision-handler";
 import { CollisionLayer } from "../physics/collision-layers";
+import { BridgeEffect } from "../effects/bridge-effect";
 
 export class World {
   private readonly mapFilePath: string = "./assets/maps/map.json";
@@ -91,6 +92,55 @@ export class World {
 
     for (const hitbox of this.tileHitboxes) {
       collisionHandler.addCollider(hitbox);
+    }
+  }
+
+  generateWorldEffects(collisionHandler: CollisionHandler) {
+    for (let i = 0; i < this.tileMap.length; i++) {
+      for (let j = 0; j < this.tileMap[i].length; j++) {
+        const tileId = this.tileMap[i][j];
+
+        let collider: Box;
+        let bridgeEffect: BridgeEffect;
+
+        switch (tileId) {
+          case "42":
+            collider = new Box(40, 10, 10, 100);
+            bridgeEffect = new BridgeEffect(-0.5, BridgeEffect.HORIZONTAL);
+            break;
+          case "46":
+            collider = new Box(14, 10, 10, 100);
+            bridgeEffect = new BridgeEffect(0.5, BridgeEffect.HORIZONTAL);
+            break;
+          case "26":
+            collider = new Box(8, 10, 48, 12);
+            bridgeEffect = new BridgeEffect(-0.5, BridgeEffect.VERTICAL);
+            break;
+          case "29":
+            collider = new Box(8, 32, 48, 16);
+            bridgeEffect = new BridgeEffect(0.5, BridgeEffect.VERTICAL);
+            break;
+          case "37":
+            collider = new Box(20, 0, 88, 16);
+            bridgeEffect = new BridgeEffect(-0.5, BridgeEffect.VERTICAL);
+            break;
+          case "41":
+            collider = new Box(20, 16, 88, 32);
+            bridgeEffect = new BridgeEffect(0.5, BridgeEffect.VERTICAL);
+            break;
+          default:
+            continue;
+        }
+
+        collider.x += j * this.mapJSON.tilewidth;
+        collider.y += i * this.mapJSON.tileheight;
+        collider.setCollisionLayer(CollisionLayer.EFFECTS);
+        collider.setCollisionMask(CollisionLayer.PLAYER);
+        collider.isTrigger = true;
+        collider.isStatic = true;
+        collider.effects = [bridgeEffect];
+        collisionHandler.addCollider(collider);
+      }
     }
   }
 

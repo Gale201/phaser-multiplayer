@@ -7,6 +7,7 @@ import { CollisionHandler } from "../physics/collision-handler";
 import { Box } from "../physics/box";
 import { CollisionLayer } from "../physics/collision-layers";
 import { BridgeEffect } from "../effects/bridge-effect";
+import { Vector2 } from "../physics/vectors";
 
 export class Game {
   private readonly FPS = 60;
@@ -31,14 +32,7 @@ export class Game {
     );
 
     this.world.generateTileHitboxes(this.collisionHandler);
-
-    const collider = new Box(620, 460, 10, 80);
-    collider.setCollisionLayer(CollisionLayer.EFFECTS);
-    collider.setCollisionMask(CollisionLayer.PLAYER);
-    collider.isTrigger = true;
-    collider.isStatic = true;
-    collider.effects = [new BridgeEffect()];
-    this.collisionHandler.addCollider(collider);
+    this.world.generateWorldEffects(this.collisionHandler);
 
     this.start();
   }
@@ -76,6 +70,9 @@ export class Game {
         player.serialized()
       ),
       tiles: this.world.getTileHitboxes(),
+      colliders: this.collisionHandler
+        .getColliders()
+        .map((collider) => collider.getHitbox()),
     });
   }
 

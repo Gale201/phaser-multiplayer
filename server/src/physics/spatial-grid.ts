@@ -69,4 +69,12 @@ export class SpatialHashGrid {
     }
     return keys;
   }
+
+  getColliders(): Collidable[] {
+    const colliders: Set<Collidable> = new Set();
+    for (const cellCollidables of this.grid.values()) {
+      cellCollidables.forEach((collidable) => colliders.add(collidable));
+    }
+    return Array.from(colliders);
+  }
 }

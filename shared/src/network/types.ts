@@ -23,4 +23,5 @@ export type PlayerData = {
 export type GameUpdateData = {
   players: PlayerData[];
   tiles: { x: number; y: number; w: number; h: number }[];
+  colliders: { x: number; y: number; w: number; h: number }[];
 };

@@ -10,8 +10,6 @@ export class PlayerManager {
   private player: Player;
   private remotePlayers: Map<string, RemotePlayer> = new Map();
 
-  private created: boolean = false;
-
   constructor(scene: GameScene, playerData: PlayerData) {
     this.scene = scene;
 
@@ -33,8 +31,6 @@ export class PlayerManager {
       0.04,
       0.04
     );
-
-    this.created = true;
   }
 
   private createAnimations() {

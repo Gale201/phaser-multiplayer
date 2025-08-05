@@ -46,7 +46,8 @@ export class GameScene extends Phaser.Scene {
     this.network.on(Signals.UPDATE_GAME, (data: GameUpdateData) => {
       this.playerManager.updatePlayers(data.players);
 
-      this.worldTiles = data.tiles.map((tile) => Box.from(tile));
+      // this.worldTiles = data.tiles.map((tile) => Box.from(tile));
+      this.worldTiles = data.colliders.map((collider) => Box.from(collider));
     });
   }
 
@@ -114,8 +115,6 @@ export class GameScene extends Phaser.Scene {
       this.hitboxDebugger.addHitbox(tile);
     });
 
-    this.hitboxDebugger.addHitbox(new Box(620, 460, 10, 80));
-
     // this.hitboxDebugger.update();
   }
 
@@ -165,10 +164,11 @@ export const config: Phaser.Types.Core.GameConfig = {
   pixelArt: true,
   roundPixels: true,
   autoRound: true,
+  antialias: false,
   backgroundColor: "#1d1d1d",
   scene: [GameScene],
   scale: {
-    mode: Phaser.Scale.RESIZE,
+    mode: Phaser.Scale.NO_CENTER,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
 };
